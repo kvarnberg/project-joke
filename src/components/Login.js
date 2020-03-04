@@ -4,10 +4,10 @@ import fire from "../config/Fire";
 class Login extends React.Component {
   constructor(props) {
     super(props);
-    this.handleChange = this.handleChange.bind(this);
     this.state = {
       email: "",
-      password: ""
+      password: "",
+      jokes: []
     };
   }
 
@@ -32,9 +32,9 @@ class Login extends React.Component {
       });
   };
 
-  handleChange(e) {
+  handleChange = e => {
     this.setState({ [e.target.name]: e.target.value });
-  }
+  };
 
   render() {
     return (
