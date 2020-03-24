@@ -16,9 +16,9 @@ class Login extends React.Component {
     fire
       .auth()
       .signInWithEmailAndPassword(this.state.email, this.state.password)
-      .then(u => {})
+      .then()
       .catch(error => {
-        console.log(error);
+        alert(error);
       });
   };
 
@@ -27,8 +27,15 @@ class Login extends React.Component {
     fire
       .auth()
       .createUserWithEmailAndPassword(this.state.email, this.state.password)
+      .then(u => {
+        const db = fire.firestore();
+        return db.collection("users").doc(u.user.uid);
+      })
+      .then(() => {
+        console.log("created db for user");
+      })
       .catch(error => {
-        console.log(error);
+        alert(error);
       });
   };
 

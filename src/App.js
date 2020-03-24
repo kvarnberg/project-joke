@@ -2,11 +2,10 @@ import React from "react";
 import "./App.css";
 import Home from "./components/Home";
 import Random from "./components/Random";
-import Search from "./components/Search";
+import Jokes from "./components/Jokes";
 import About from "./components/About";
 import Nav from "./components/Nav";
-import fire from "./config/Fire";
-import Login from "./components/Login";
+import firebase from "firebase";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 class App extends React.Component {
@@ -14,30 +13,58 @@ class App extends React.Component {
     super(props);
     this.state = {
       user: {},
-      loaded: false
+      email: "",
+      password: ""
     };
   }
 
   componentDidMount() {
     this.authListener();
-    this.setState({ loaded: true });
   }
 
   authListener() {
-    fire.auth().onAuthStateChanged(user => {
-      // console.log(user);
+    firebase.auth().onAuthStateChanged(user => {
       if (user) {
         this.setState({ user });
-        // localStorage.setItem("user", user.uid);
+        localStorage.setItem("user", user.uid);
       } else {
         this.setState({ user: null });
-        // localStorage.removeItem("user");
+        localStorage.removeItem("user");
       }
     });
   }
 
-  loading = () => {
-    return <div>LOADING</div>;
+  login = e => {
+    e.preventDefault();
+    firebase
+      .auth()
+      .signInWithEmailAndPassword(this.state.email, this.state.password)
+      .then(u => {
+        this.setState({ userInfo: u.user });
+      })
+      .catch(error => {
+        alert(error);
+      });
+  };
+
+  signup = e => {
+    e.preventDefault();
+    firebase
+      .auth()
+      .createUserWithEmailAndPassword(this.state.email, this.state.password)
+      .then(u => {
+        const db = firebase.firestore();
+        db.collection("users")
+          .doc(u.user.uid)
+          .set({ user: u.user.email });
+      })
+      .catch(error => {
+        alert(error);
+      });
+  };
+
+  handleChange = e => {
+    this.setState({ [e.target.name]: e.target.value });
   };
 
   render() {
@@ -50,7 +77,10 @@ class App extends React.Component {
               <Switch>
                 <Route path="/" exact component={Home} />
                 <Route path="/random" component={Random} />
-                <Route path="/search" component={Search} />
+                <Route
+                  path="/jokes"
+                  render={props => <Jokes {...props} user={this.state.user} />}
+                />
                 <Route path="/about" component={About} />
                 <Route
                   path="*"
@@ -60,29 +90,32 @@ class App extends React.Component {
             </div>
           </Router>
         ) : (
-          <Login />
+          <div>
+            <form id="signForm">
+              <input
+                value={this.state.email}
+                onChange={this.handleChange}
+                type="email"
+                name="email"
+                placeholder="enter email"
+              ></input>
+              <input
+                value={this.state.password}
+                onChange={this.handleChange}
+                type="password"
+                name="password"
+                placeholder="enter password"
+              ></input>
+              <button type="submit" onClick={this.login}>
+                Login
+              </button>
+              <button onClick={this.signup}>Signup</button>
+            </form>
+          </div>
         )}
       </div>
     );
   }
 }
 
-/*make a home component in different file*/
-
-/* <Router>
-        <div className="App">
-          <Nav />
-          <Switch>
-            <Route path="/" exact component={Home} />
-            <Route path="/random" component={Random} />
-            <Route path="/search" component={Search} />
-            <Route path="/about" component={About} />
-            <Route path="/register" component={Register} />
-            <Route
-              path="*"
-              component={() => "404 NOT FOUND IN THIS APP-UNIVERSE"}
-            />
-          </Switch>
-        </div>
-      </Router>*/
 export default App;

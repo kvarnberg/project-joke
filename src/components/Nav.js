@@ -21,8 +21,8 @@ function Nav() {
         <Link style={navStyle} to="/random">
           <li>random</li>
         </Link>
-        <Link style={navStyle} to="/search">
-          <li>search</li>
+        <Link style={navStyle} to="/jokes">
+          <li>jokes</li>
         </Link>
         <Link style={navStyle} to="/about">
           <li>about</li>
